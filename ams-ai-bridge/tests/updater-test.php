@@ -8,7 +8,8 @@ function get_site_transient($key) { return $GLOBALS['cache'][$key] ?? false; }
 function set_site_transient($key, $value, $ttl) { $GLOBALS['cache'][$key] = $value; check($ttl === 21600); }
 function delete_site_transient($key) { unset($GLOBALS['cache'][$key]); }
 function wp_safe_remote_get($url, $args) { return json_encode($GLOBALS['manifest']); }
-function wp_remote_retrieve_response_code($response) { return 200; }
+function wp_remote_retrieve_response_code($response) { return '200'; }
+function current_user_can($capability) { return $capability === 'update_plugins'; }
 function wp_remote_retrieve_body($response) { return $response; }
 function is_wp_error($value) { return $value instanceof WP_Error; }
 function wp_delete_file($file) { unlink($file); }
@@ -34,6 +35,12 @@ AMS_AI_Bridge_Updater::offer_update($state);
 check($state->response['other/other.php'] === $other);
 check($state->response[$file]->new_version === '0.1.3');
 check($state->response[$file]->package === $zip);
+check(AMS_AI_Bridge_Updater::native_update(false, array(), $file)['package'] === $zip);
+check(AMS_AI_Bridge_Updater::native_update(false, array(), 'another/plugin.php') === false);
+$cache['update_plugins'] = $state;
+$_GET['force-check'] = '1';
+AMS_AI_Bridge_Updater::refresh_admin_updates();
+check(!isset($cache['update_plugins']) && !isset($cache[AMS_AI_Bridge_Updater::CACHE]));
 check(AMS_AI_Bridge_Updater::details(false, 'plugin_information', (object) array('slug' => 'another')) === false);
 check(AMS_AI_Bridge_Updater::details(false, 'plugin_information', (object) array('slug' => 'ams-ai-bridge'))->sections['changelog'] === '<p>Patch release</p>');
 $verified = AMS_AI_Bridge_Updater::verify_package(false, $zip, null, array('plugin' => $file));

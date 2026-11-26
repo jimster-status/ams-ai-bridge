@@ -22,7 +22,7 @@ final class AMS_AI_Bridge_Updater {
         $response = wp_safe_remote_get(self::MANIFEST, array('timeout' => 10, 'redirection' => 0,
             'limit_response_size' => 65536, 'headers' => array('Accept' => 'application/json')));
         $info = null;
-        if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+        if (!is_wp_error($response) && (int) wp_remote_retrieve_response_code($response) === 200) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
             if (is_array($data) && isset($data['version'], $data['download_url'], $data['sha256'])
                 && is_string($data['version']) && preg_match('/\A\d+\.\d+\.\d+\z/', $data['version'])
@@ -54,6 +54,21 @@ final class AMS_AI_Bridge_Updater {
         return $transient;
     }
 
+    public static function native_update($update, $plugin_data, $plugin_file) {
+        if ($plugin_file !== self::plugin_file()) { return $update; }
+        $info = self::manifest();
+        if (!$info) { return $update; }
+        return array('id' => self::REPOSITORY, 'slug' => self::SLUG, 'version' => $info['version'],
+            'url' => self::REPOSITORY, 'package' => $info['download_url'], 'requires_php' => '7.4');
+    }
+
+    public static function refresh_admin_updates() {
+        self::clear_cache();
+        if (!empty($_GET['force-check']) && current_user_can('update_plugins')) {
+            delete_site_transient('update_plugins');
+        }
+    }
+
     public static function details($result, $action, $args) {
         if ($action !== 'plugin_information' || ($args->slug ?? '') !== self::SLUG) { return $result; }
         $info = self::manifest();
@@ -83,7 +98,8 @@ final class AMS_AI_Bridge_Updater {
 }
 
 add_filter('pre_set_site_transient_update_plugins', array('AMS_AI_Bridge_Updater', 'offer_update'));
+add_filter('update_plugins_github.com', array('AMS_AI_Bridge_Updater', 'native_update'), 10, 3);
 add_filter('plugins_api', array('AMS_AI_Bridge_Updater', 'details'), 10, 3);
 add_filter('upgrader_pre_download', array('AMS_AI_Bridge_Updater', 'verify_package'), 10, 4);
-add_action('load-update-core.php', array('AMS_AI_Bridge_Updater', 'clear_cache'));
+add_action('load-update-core.php', array('AMS_AI_Bridge_Updater', 'refresh_admin_updates'), 1);
 add_action('upgrader_process_complete', array('AMS_AI_Bridge_Updater', 'clear_cache'));
