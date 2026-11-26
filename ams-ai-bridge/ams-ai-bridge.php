@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AMS AI Bridge
  * Description: Controlled Elementor draft editing for the AMS Wren and Quill agents. Pilot: roofing page only.
- * Version: 0.1.5
+ * Version: 0.1.6
  * Update URI: https://github.com/jimster-status/ams-ai-bridge
  * Requires PHP: 7.4
  * Text Domain: ams-ai-bridge
@@ -11,7 +11,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class AMS_AI_Bridge {
-    const VERSION = '0.1.5';
+    const VERSION = '0.1.6';
     const NS = 'ams-ai-bridge/v1';
     const SOURCE_SLUG = 'roofing-contractor-marketing';
     const META_SOURCE = '_ams_ai_bridge_source_id';
@@ -135,7 +135,7 @@ final class AMS_AI_Bridge {
         return true;
     }
 
-    public static function status() {
+    public static function status($request = null) {
         $p = self::source_page();
         return rest_ensure_response(array(
             'name' => 'AMS AI Bridge', 'version' => self::VERSION,
@@ -143,6 +143,8 @@ final class AMS_AI_Bridge {
             'pilot_source_id' => $p ? (int)$p->ID : null,
             'features' => array('read_page', 'draft_clone', 'read_widgets', 'patch_text_widget'),
             'publication' => 'wordpress_admin_only',
+            'update_check' => $request && $request->get_param('update_check') && current_user_can('update_plugins')
+                ? AMS_AI_Bridge_Updater::diagnose() : null,
         ));
     }
 

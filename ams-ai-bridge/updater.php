@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) { exit; }
 
 final class AMS_AI_Bridge_Updater {
     const REPOSITORY = 'https://github.com/jimster-status/ams-ai-bridge';
-    const MANIFEST = 'https://raw.githubusercontent.com/jimster-status/ams-ai-bridge/main/update.json';
+    const MANIFEST = 'https://raw.githubusercontent.com/jimster-status/ams-ai-bridge/refs/heads/main/update.json';
     const SLUG = 'ams-ai-bridge';
     const CACHE = 'ams_ai_bridge_update_manifest';
 
@@ -16,12 +16,18 @@ final class AMS_AI_Bridge_Updater {
         delete_site_transient(self::CACHE);
     }
 
-    private static function manifest() {
-        $cached = get_site_transient(self::CACHE);
+    private static function manifest($fresh = false, &$diagnostic = null) {
+        $cached = $fresh ? false : get_site_transient(self::CACHE);
         if ($cached !== false) { return $cached ?: null; }
-        $response = wp_safe_remote_get(self::MANIFEST, array('timeout' => 10, 'redirection' => 0,
-            'limit_response_size' => 65536, 'headers' => array('Accept' => 'application/json')));
+        $url = self::MANIFEST . ($fresh ? '?bridge_check=' . rawurlencode(uniqid('', true)) : '');
+        $headers = array('Accept' => 'application/json');
+        if ($fresh) { $headers['Cache-Control'] = 'no-cache'; }
+        $response = wp_safe_remote_get($url, array('timeout' => 10, 'redirection' => 0,
+            'limit_response_size' => 65536, 'headers' => $headers));
         $info = null;
+        $diagnostic = is_wp_error($response)
+            ? array('error' => $response->get_error_code())
+            : array('http_status' => (int) wp_remote_retrieve_response_code($response));
         if (!is_wp_error($response) && (int) wp_remote_retrieve_response_code($response) === 200) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
             if (is_array($data) && isset($data['version'], $data['download_url'], $data['sha256'])
@@ -32,7 +38,14 @@ final class AMS_AI_Bridge_Updater {
             }
         }
         set_site_transient(self::CACHE, $info ?: 0, 6 * HOUR_IN_SECONDS);
+        $diagnostic['remote_version'] = $info['version'] ?? null;
         return $info;
+    }
+
+    public static function diagnose() {
+        $diagnostic = null;
+        self::manifest(true, $diagnostic);
+        return $diagnostic;
     }
 
     public static function offer_update($transient) {
@@ -63,8 +76,8 @@ final class AMS_AI_Bridge_Updater {
     }
 
     public static function refresh_admin_updates() {
-        self::clear_cache();
         if (!empty($_GET['force-check']) && current_user_can('update_plugins')) {
+            self::manifest(true);
             delete_site_transient('update_plugins');
         }
     }
