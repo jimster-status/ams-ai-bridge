@@ -1,10 +1,15 @@
 {
-  "version": "0.1.4",
-  "download_url": "https://github.com/jimster-status/ams-ai-bridge/raw/main/releases/ams-ai-bridge-0.1.4.zip",
-  "sha256": "081595e22ba0e1eb068918117e022fb6be437d81b87689ab8112983be8417910",
+  "version": "0.1.5",
+  "download_url": "https://github.com/jimster-status/ams-ai-bridge/raw/main/releases/ams-ai-bridge-0.1.5.zip",
+  "sha256": "a19653c4000256bb4d2743d490b5770b3de317d99c4934011b715c9aeb78aeed",
   "released": "2026-11-26",
   "requires_php": "7.4",
   "changelog": [
+    {
+      "version": "0.1.5",
+      "date": "2026-11-26",
+      "note": "Version-only release to verify the corrected WordPress update discovery."
+    },
     {
       "version": "0.1.4",
       "date": "2026-11-26",
@@ -21,5 +26,5 @@
       "note": "Add WordPress updates from the Bridge repository and block stale working drafts."
     }
   ],
-  "changelog_html": "<h4>0.1.4 (2026-11-26)</h4><p>Refresh the Bridge feed before WordPress checks and register through the native update hook.</p><h4>0.1.3 (2026-11-26)</h4><p>Version-only release to verify the WordPress Update now workflow.</p><h4>0.1.2 (2026-11-26)</h4><p>Add WordPress updates from the Bridge repository and block stale working drafts.</p>"
+  "changelog_html": "<h4>0.1.5 (2026-11-26)</h4><p>Version-only release to verify the corrected WordPress update discovery.</p><h4>0.1.4 (2026-11-26)</h4><p>Refresh the Bridge feed before WordPress checks and register through the native update hook.</p><h4>0.1.3 (2026-11-26)</h4><p>Version-only release to verify the WordPress Update now workflow.</p><h4>0.1.2 (2026-11-26)</h4><p>Add WordPress updates from the Bridge repository and block stale working drafts.</p>"
 }
