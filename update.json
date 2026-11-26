@@ -1,0 +1,15 @@
+{
+  "version": "0.1.2",
+  "download_url": "https://github.com/jimster-status/ams-ai-bridge/raw/main/releases/ams-ai-bridge-0.1.2.zip",
+  "sha256": "a4a33b82322a4ff0100a5c6bbbeee28d713caaaa3b6029cc9b599d7f1a37f253",
+  "released": "2026-11-26",
+  "requires_php": "7.4",
+  "changelog": [
+    {
+      "version": "0.1.2",
+      "date": "2026-11-26",
+      "note": "Add WordPress updates from the Bridge repository and block stale working drafts."
+    }
+  ],
+  "changelog_html": "<h4>0.1.2 (2026-11-26)</h4><p>Add WordPress updates from the Bridge repository and block stale working drafts.</p>"
+}
